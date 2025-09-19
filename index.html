@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sydney Bus Engine (Audio Version)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+      padding: 40px;
+    }
+    .sound-control {
+      margin-bottom: 25px;
+    }
+    button {
+      margin: 5px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #1e90ff;
+      color: white;
+    }
+    button:active {
+      background: #155fa0;
+    }
+    .time, .loop-status {
+      font-size: 14px;
+      margin-top: 5px;
+      color: #ccc;
+    }
+    video {
+      display: none;
+      margin-top: 10px;
+      max-width: 400px;
+      border: 2px solid #444;
+      border-radius: 10px;
+    }
+    .toggle-container {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Denning Element 2 Electric Sydney Bus Engine</h1>
+
+  <!-- Global toggle -->
+  <div class="toggle-container">
+    <label>
+      <input type="checkbox" id="toggleAllVideos" onchange="toggleAllVideos(this)">
+      Show all videos
+    </label>
+  </div>
+
+  <div class="sound-control">
+    <button onclick="playSound('start')">Start Engine</button>
+    <button onclick="stopSound('start')">Stop</button>
+    <button onclick="toggleLoop('start')">Loop</button>
+    <div class="loop-status" id="loop-start">Loop: OFF</div>
+    <div class="time" id="time-start">0:00 / 0:00</div>
+    <video id="video-start" src="sounds/Before Torque Acceleration ZF CeTrax motor cde 2.mov"></video>
+  </div>
+
+  <div class="sound-control">
+    <button onclick="playSound('high')">High Speed</button>
+    <button onclick="stopSound('high')">Stop</button>
+    <button onclick="toggleLoop('high')">Loop</button>
+    <div class="loop-status" id="loop-high">Loop: OFF</div>
+    <div class="time" id="time-high">0:00 / 0:00</div>
+    <video id="video-high" src="sounds/ZF CeTrax motor cde 2.mov"></video>
+  </div>
+
+  <div class="sound-control">
+    <button onclick="playSound('retarder')">Retarder</button>
+    <button onclick="stopSound('retarder')">Stop</button>
+    <button onclick="toggleLoop('retarder')">Loop</button>
+    <div class="loop-status" id="loop-retarder">Loop: OFF</div>
+    <div class="time" id="time-retarder">0:00 / 0:00</div>
+    <video id="video-retarder" src="sounds/Regenerative Breaking cde 2.mov"></video>
+  </div>
+
+  <div class="sound-control">
+    <button onclick="playSound('brake')">Parking Brake</button>
+    <button onclick="stopSound('brake')">Stop</button>
+    <button onclick="toggleLoop('brake')">Loop</button>
+    <div class="loop-status" id="loop-brake">Loop: OFF</div>
+    <div class="time" id="time-brake">0:00 / 0:00</div>
+    <video id="video-brake" src="sounds/Parking Brake.mov"></video>
+  </div>
+
+  <button onclick="stopAll()">Stop All</button>
+
+  <script>
+    const sounds = {
+      start: document.getElementById("video-start"),
+      high: document.getElementById("video-high"),
+      retarder: document.getElementById("video-retarder"),
+      brake: document.getElementById("video-brake"),
+    };
+
+    function stopAll() {
+      for (let key in sounds) {
+        stopSound(key);
+      }
+    }
+
+    function playSound(name) {
+      stopAll();
+      sounds[name].play();
+    }
+
+    function stopSound(name) {
+      let vid = sounds[name];
+      vid.pause();
+      vid.currentTime = 0;
+    }
+
+    function toggleLoop(name) {
+      let vid = sounds[name];
+      vid.loop = !vid.loop;
+      document.getElementById("loop-" + name).textContent =
+        "Loop: " + (vid.loop ? "ON" : "OFF");
+    }
+
+    function toggleAllVideos(checkbox) {
+      let show = checkbox.checked;
+      for (let key in sounds) {
+        sounds[key].style.display = show ? "block" : "none";
+      }
+    }
+
+    function formatTime(sec) {
+      let m = Math.floor(sec / 60);
+      let s = Math.floor(sec % 60);
+      return `${m}:${s.toString().padStart(2, "0")}`;
+    }
+
+    function updateTime(name) {
+      let vid = sounds[name];
+      let display = document.getElementById("time-" + name);
+
+      vid.addEventListener("loadedmetadata", () => {
+        display.textContent =
+          `${formatTime(vid.currentTime)} / ${formatTime(vid.duration || 0)}`;
+      });
+
+      vid.addEventListener("timeupdate", () => {
+        display.textContent =
+          `${formatTime(vid.currentTime)} / ${formatTime(vid.duration || 0)}`;
+      });
+    }
+
+    // Init timers for each video
+    updateTime("start");
+    updateTime("high");
+    updateTime("retarder");
+    updateTime("brake");
+  </script>
+</body>
+</html>
